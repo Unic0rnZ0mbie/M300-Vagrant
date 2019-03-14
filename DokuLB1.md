@@ -2,12 +2,7 @@
 
 ## Persönlicher Stand
 
-Ich habe aus dem Betrieb schon einige Erfahrungen mit Virtualisierung gemacht, 
-da wir aber so gut wie nur Microsoft Produkte verwenden, habe ich was die Virualisierung
-mit Linux angeht nur Erfahrungen aus dem ÜK 340 welchen ich Momentan absolviere. 
-Ich werde diesen am 15.3.2019 abschliessen. Mit Vagrant habe ich bisher noch keine Erfahrungen gemacht.
-Virtualisierung und die Automatisierung davon ist für mich aber ein sehr spannendes Thema und ich 
-freue mich mehr darüber zu lernen.
+
 
 ### Einrichten
 
@@ -16,7 +11,7 @@ freue mich mehr darüber zu lernen.
 1. Git bash herunterladen 
 2. Git bash installieren
 
-Anschliessend wird noch das Repository auf den lokalen Computer kopiert.
+Anschliessend wird noch das Repository auf den lokalen Computer geklont.
 
 $ git clone https://github.com/mc-b/M300      #Repository klonen
  
