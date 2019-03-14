@@ -20,7 +20,7 @@ $ git clone https://github.com/mc-b/M300      #Repository klonen
 
 1. GitHub Account erstellen
 2. Mit Git bash SSH Key erstellen
-   ssh-keygen -t rsa -b 4096 -C "laurent.zuerrer@edu.tbz.ch"aqaqa
+$ ssh-keygen -t rsa -b 4096 -C "laurent.zuerrer@edu.tbz.ch"
 4. SSH Key dem GitHub Konto hinzufügen
 
 ## Virtualbox
