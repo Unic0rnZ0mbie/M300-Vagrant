@@ -1,0 +1,70 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+
+Vagrant.configure("2") do |config|
+
+	
+	config.vm.define "database" do |db|
+		db.vm.box = "ubuntu/xenial64"
+		db.vm.hostname = "m300-db"
+		db.vm.network "private_network", ip: "192.168.2.200"
+		# MySQL Port nur im Private Network sichtbar
+		# db.vm.network "forwarded_port", guest:3306, host:3306, auto_correct: false
+		# wird nicht benötigt, da ich die Datenbank nicht auf dem Host system brauche 
+		# nur die Webschnittstelle wird weitergeleitet. 
+			db.vm.provider "virtualbox" do |vb|
+				vb.memory = "512"
+			end	
+		db.vm.provision "shell", path: "db.sh"
+	end
+		
+	config.vm.define "web" do |web|
+		web.vm.box = "ubuntu/xenial64"
+		web.vm.hostname = "m300-web"
+		web.vm.network "private_network", ip: "192.168.2.100"
+			web.vm.network "forwarded_port", guest:80, host:8080, auto_correct: true
+			web.vm.provider "virtualbox" do |vb|
+				vb.memory = "512"
+			end
+		web.vm.synced_folder ".", "/var/www/html"	
+		web.vm.provision "shell", inline: <<-SHELL
+	    # Debug ON!!!
+			set -o xtrace	
+			sudo apt-get update
+			sudo apt-get -y install ufw
+			sudo ufw enable -y
+			#SSH port 22 für host Ip erlauben
+			sudo ufw allow from 10.71.13.73 to any port 22
+			
+			#Reverse Proxy installieren
+			sudo apt-get -y install libapache2-mod-proxy-html
+			sudo apt-get -y install libxml2-dev
+			
+			#Reverse Proxy module unter Apache aktivieren
+			sudo a2enmod proxy
+			sudo a2enmod proxy_html
+			sudo a2enmod proxy_http 
+			
+			#DB schnittstelle installieren
+			sudo apt-get -y install debconf-utils apache2 nmap
+			sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password admin'
+			sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password admin'
+			sudo apt-get -y install php libapache2-mod-php php-curl php-cli php-mysql php-gd mysql-client  
+			# Admininer SQL UI 
+			sudo mkdir /usr/share/adminer
+			sudo wget "http://www.adminer.org/latest.php" -O /usr/share/adminer/latest.php
+			sudo ln -s /usr/share/adminer/latest.php /usr/share/adminer/adminer.php
+			echo "Alias /adminer.php /usr/share/adminer/adminer.php" | sudo tee /etc/apache2/conf-available/adminer.conf
+			sudo a2enconf adminer.conf 
+			sudo service apache2 restart 
+			# Test ob Apache Server laueft - ansonsten Abbruch!!!
+			curl -f http://localhost >/dev/null 2>&1 && { echo "Apache up"; } || { echo "Error: Apache down"; exit 1; }
+			echo '127.0.0.1 localhost m300-web\ 192.168.2.200 m300-db' > /etc/hosts
+		SHELL
+	end
+end
