@@ -1,0 +1,59 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+
+Vagrant.configure("2") do |config|
+
+	
+	config.vm.define "database" do |db|
+		db.vm.box = "ubuntu/xenial64"
+		db.vm.hostname = "m300-db"
+		db.vm.network "private_network", ip: "192.168.2.200"
+		# MySQL Port nur im Private Network sichtbar
+		# db.vm.network "forwarded_port", guest:3306, host:3306, auto_correct: false
+		# wird nicht benötigt, da ich die Datenbank nicht auf dem Host system brauche 
+		# nur die Webschnittstelle wird weitergeleitet. 
+			db.vm.provider "virtualbox" do |vb|
+				vb.memory = "512"
+			end	
+		db.vm.provision "shell", path: "db.sh"
+	end
+		
+	config.vm.define "web01" do |web01|
+		web01.vm.box = "ubuntu/xenial64"
+		web01.vm.hostname = "m300-web01"
+		web01.vm.network "private_network", ip: "192.168.2.100"
+			#web01.vm.network "forwarded_port", guest:80, host:8080, auto_correct: true
+			web01.vm.provider "virtualbox" do |vb|
+				vb.memory = "512"
+			end
+		web01.vm.provision "shell", path: "web01.sh"
+	end
+	
+config.vm.define "web02" do |web02|
+		web02.vm.box = "ubuntu/xenial64"
+		web02.vm.hostname = "m300-web02"
+		web02.vm.network "private_network", ip: "192.168.2.101"
+			#web02.vm.network "forwarded_port", guest:80, host:8080, auto_correct: true
+			web02.vm.provider "virtualbox" do |vb|
+				vb.memory = "512"
+			end
+		web02.vm.provision "shell", path: "web02.sh"
+	end
+
+config.vm.define "proxy" do |proxy|
+		proxy.vm.box = "ubuntu/xenial64"
+		proxy.vm.hostname = "m300-proxy"
+		proxy.vm.network "private_network", ip: "192.168.2.50"
+			proxy.vm.network "forwarded_port", guest:80, host:8080, auto_correct: true
+			proxy.vm.provider "virtualbox" do |vb|
+				vb.memory = "512"
+			end
+		proxy.vm.synced_folder ".", "/vagrant"
+		proxy.vm.provision "shell", path: "proxy.sh"
+	end
+end
